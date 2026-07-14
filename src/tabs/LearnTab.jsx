@@ -377,8 +377,18 @@ export default function LearnTab({ musicKey, lessonsRead, onRead }) {
   const [openId, setOpenId] = useState(null);
   const lesson = LESSONS.find((l) => l.id === openId);
 
+  const open = (l) => {
+    setOpenId(l.id);
+    onRead(l.id);
+    markLessonRead(l.id);
+    window.scrollTo({ top: 0 });
+  };
+
   if (lesson) {
     const Comp = lesson.comp;
+    const idx = LESSONS.findIndex((l) => l.id === lesson.id);
+    const prev = LESSONS[idx - 1];
+    const next = LESSONS[idx + 1];
     return (
       <div className="lesson-view">
         <button className="btn btn-ghost" onClick={() => setOpenId(null)}>
@@ -388,6 +398,24 @@ export default function LearnTab({ musicKey, lessonsRead, onRead }) {
           Lesson {lesson.no}: {lesson.title}
         </h2>
         <Comp musicKey={musicKey} />
+        <div className="lesson-nav">
+          {prev ? (
+            <button className="btn btn-ghost" onClick={() => open(prev)}>
+              ← Lesson {prev.no}
+            </button>
+          ) : (
+            <span />
+          )}
+          {next ? (
+            <button className="btn btn-primary lesson-nav-next" onClick={() => open(next)}>
+              次へ: Lesson {next.no} {next.title} →
+            </button>
+          ) : (
+            <button className="btn btn-primary" onClick={() => setOpenId(null)}>
+              🎉 全レッスン完了!一覧へ戻る
+            </button>
+          )}
+        </div>
       </div>
     );
   }
@@ -400,15 +428,7 @@ export default function LearnTab({ musicKey, lessonsRead, onRead }) {
       </p>
       <div className="lesson-list">
         {LESSONS.map((l) => (
-          <button
-            key={l.id}
-            className="lesson-card"
-            onClick={() => {
-              setOpenId(l.id);
-              onRead(l.id);
-              markLessonRead(l.id);
-            }}
-          >
+          <button key={l.id} className="lesson-card" onClick={() => open(l)}>
             <span className="lesson-no">Lesson {l.no}</span>
             <span className="lesson-title">{l.title}</span>
             {lessonsRead[l.id] && <span className="lesson-done">✓ 読了</span>}
