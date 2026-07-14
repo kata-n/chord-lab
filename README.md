@@ -2,6 +2,8 @@
 
 音楽のコード進行を「読んで・聴いて・解いて」学べる、初心者向けのWebアプリです。
 
+**公開URL: https://kata-n.github.io/chord-lab/** (スマホからもどうぞ)
+
 ## 起動方法
 
 ```bash
@@ -10,6 +12,10 @@ npm run dev   # http://localhost:5173 で起動
 ```
 
 公開用にビルドする場合は `npm run build`(`dist/` に出力)。
+
+## デプロイ
+
+`main` ブランチに push すると、GitHub Actions(`.github/workflows/deploy.yml`)が自動でビルドして GitHub Pages に公開します。手動で反映したい場合も `git push` するだけです。
 
 ## 機能
 
