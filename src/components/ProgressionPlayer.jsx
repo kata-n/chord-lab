@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { playProgression } from '../audio.js';
+import { useSolfege, withSolfege } from '../solfege.jsx';
 import PianoKeyboard from './PianoKeyboard.jsx';
 
 // コード進行の再生プレイヤー。コードのチップ表示+鍵盤+再生/停止ボタン。
@@ -13,6 +14,7 @@ export default function ProgressionPlayer({
   const [step, setStep] = useState(-1);
   const [playing, setPlaying] = useState(false);
   const stopRef = useRef(null);
+  const { on: solfegeOn } = useSolfege();
 
   useEffect(() => {
     return () => {
@@ -56,7 +58,9 @@ export default function ProgressionPlayer({
           {chords.map((c, i) => (
             <div key={i} className={i === step ? 'chip chip-on' : 'chip'}>
               <div className="chip-name">{c.name}</div>
-              {showRoman && c.roman && <div className="chip-roman">{c.roman}</div>}
+              {showRoman && c.roman && (
+                <div className="chip-roman">{withSolfege(c.roman, solfegeOn)}</div>
+              )}
             </div>
           ))}
         </div>

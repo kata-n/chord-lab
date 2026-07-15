@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { playChord, playProgression } from '../audio.js';
 import { recordAnswer } from '../storage.js';
+import { useSolfege, withSolfege } from '../solfege.jsx';
 
 // クイズの出題・解答・フィードバックを担う共通コンポーネント。
 // generate() が問題オブジェクトを返す。
@@ -10,6 +11,7 @@ export default function QuizRunner({ generate }) {
   const [listened, setListened] = useState(false);
   const [count, setCount] = useState({ correct: 0, total: 0 });
   const stopRef = useRef(null);
+  const { on: solfegeOn } = useSolfege();
 
   useEffect(() => {
     return () => {
@@ -54,7 +56,7 @@ export default function QuizRunner({ generate }) {
       <div className="quiz-score">
         このセッション: {count.correct} / {count.total} 問正解
       </div>
-      <p className="quiz-prompt">{q.prompt}</p>
+      <p className="quiz-prompt">{withSolfege(q.prompt, solfegeOn)}</p>
       {q.sound && (
         <button className="btn btn-play" onClick={play}>
           {q.soundLabel}
@@ -71,7 +73,7 @@ export default function QuizRunner({ generate }) {
           }
           return (
             <button key={i} className={cls} disabled={answered || locked} onClick={() => choose(i)}>
-              {opt}
+              {withSolfege(opt, solfegeOn)}
             </button>
           );
         })}
@@ -81,7 +83,7 @@ export default function QuizRunner({ generate }) {
           <div className="quiz-verdict">
             {selected === q.answerIndex ? '⭕ 正解!' : '❌ ざんねん…'}
           </div>
-          <p>{q.explain}</p>
+          <p>{withSolfege(q.explain, solfegeOn)}</p>
           <button className="btn btn-primary" onClick={next}>
             次の問題 →
           </button>

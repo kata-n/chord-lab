@@ -20,6 +20,7 @@ import {
 import ChordDemo from '../components/ChordDemo.jsx';
 import ProgressionPlayer from '../components/ProgressionPlayer.jsx';
 import { markLessonRead } from '../storage.js';
+import { useSolfege, withSolfege } from '../solfege.jsx';
 
 function Lesson1({ musicKey }) {
   const acc = musicKey.accidental;
@@ -82,6 +83,7 @@ function Lesson2({ musicKey }) {
 
 function Lesson3({ musicKey }) {
   const acc = musicKey.accidental;
+  const { on: solfegeOn } = useSolfege();
   const t = degreeChord(musicKey, 1);
   const s = degreeChord(musicKey, 4);
   const d = degreeChord(musicKey, 5);
@@ -100,9 +102,12 @@ function Lesson3({ musicKey }) {
             </div>
             <div className="func-desc">{f.desc}</div>
             <div className="func-degrees">
-              {DIATONIC.filter((x) => x.func === f.short)
-                .map((x) => romanName(x.numeral, x.quality))
-                .join('・')}
+              {withSolfege(
+                DIATONIC.filter((x) => x.func === f.short)
+                  .map((x) => romanName(x.numeral, x.quality))
+                  .join('・'),
+                solfegeOn
+              )}
             </div>
           </div>
         ))}
@@ -127,6 +132,7 @@ function Lesson3({ musicKey }) {
 
 function Lesson4({ musicKey }) {
   const acc = musicKey.accidental;
+  const { on: solfegeOn } = useSolfege();
   return (
     <div>
       <p>
@@ -140,9 +146,12 @@ function Lesson4({ musicKey }) {
             {p.name} <span className="prog-reading">{p.reading}</span>
           </h3>
           <p className="prog-roman-line">
-            {progressionChords(p, musicKey)
-              .map((c) => c.roman)
-              .join(' → ')}
+            {withSolfege(
+              progressionChords(p, musicKey)
+                .map((c) => c.roman)
+                .join(' → '),
+              solfegeOn
+            )}
           </p>
           <p>{p.desc}</p>
           <p className="prog-examples">使用例: {p.examples}</p>

@@ -3,6 +3,7 @@ import { playProgression } from '../audio.js';
 import { recordAnswer } from '../storage.js';
 import { DICTATION_LEVELS, genDictation } from '../quizzes.js';
 import { degreeChord } from '../theory.js';
+import { useSolfege, withSolfege } from '../solfege.jsx';
 
 // 度数ディクテーション: 4コード進行(先頭はⅠ固定)を聴いて、残り3つを度数で答える
 export default function DictationQuiz() {
@@ -12,6 +13,7 @@ export default function DictationQuiz() {
   const [revealed, setRevealed] = useState(false);
   const [count, setCount] = useState({ correct: 0, total: 0 });
   const stopRef = useRef(null);
+  const { on: solfegeOn } = useSolfege();
 
   useEffect(() => {
     return () => {
@@ -114,7 +116,7 @@ export default function DictationQuiz() {
 
         <div className="chip-row dict-slots">
           <div className="chip chip-fixed">
-            <div className="chip-name">Ⅰ</div>
+            <div className="chip-name">{withSolfege('Ⅰ', solfegeOn)}</div>
             <div className="chip-roman">おてほん</div>
           </div>
           {[0, 1, 2].map((i) => {
@@ -125,12 +127,16 @@ export default function DictationQuiz() {
             if (revealed) {
               const ok = answered === correctToken;
               cls += ok ? ' chip-correct' : ' chip-wrong';
-              mark = ok ? '⭕' : `❌ 正解: ${q.chords[i + 1].roman}`;
+              mark = ok
+                ? '⭕'
+                : `❌ 正解: ${withSolfege(q.chords[i + 1].roman, solfegeOn)}`;
             }
             return (
               <div key={i} className={cls}>
                 <div className="chip-name">
-                  {answered ? q.options.find((o) => o.token === answered)?.label : '?'}
+                  {answered
+                    ? withSolfege(q.options.find((o) => o.token === answered)?.label, solfegeOn)
+                    : '?'}
                 </div>
                 <div className="chip-roman">{mark || `${i + 2}つめ`}</div>
               </div>
@@ -143,7 +149,7 @@ export default function DictationQuiz() {
             <div className="dict-options">
               {q.options.map((o) => (
                 <button key={o.token} className="quiz-option dict-option" onClick={() => choose(o.token)}>
-                  {o.label}
+                  {withSolfege(o.label, solfegeOn)}
                 </button>
               ))}
             </div>
@@ -161,8 +167,8 @@ export default function DictationQuiz() {
               {allCorrect ? '⭕ 全問正解!' : 'おしい!もう一度聴いてみよう'}
             </div>
             <p>
-              正解: {q.chords.map((c) => c.roman).join(' → ')}(キー{q.key.name}では{' '}
-              {q.chords.map((c) => c.name).join(' → ')})
+              正解: {withSolfege(q.chords.map((c) => c.roman).join(' → '), solfegeOn)}(キー
+              {q.key.name}では {q.chords.map((c) => c.name).join(' → ')})
             </p>
             <div className="dict-controls">
               <button className="btn" onClick={playAll}>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { KEYS } from './theory.js';
 import { loadProgress } from './storage.js';
+import { useSolfege } from './solfege.jsx';
 import LearnTab from './tabs/LearnTab.jsx';
 import EarTab from './tabs/EarTab.jsx';
 import QuizTab from './tabs/QuizTab.jsx';
@@ -18,23 +19,33 @@ export default function App() {
   const [keyIdx, setKeyIdx] = useState(0);
   const [lessonsRead, setLessonsRead] = useState(() => loadProgress().lessonsRead);
   const musicKey = KEYS[keyIdx];
+  const solfege = useSolfege();
 
   return (
     <div className="app">
       <header className="header">
         <h1 className="logo">🎹 コード進行ラボ</h1>
-        {tab === 'learn' && (
-          <label className="key-select">
-            キー:
-            <select value={keyIdx} onChange={(e) => setKeyIdx(Number(e.target.value))}>
-              {KEYS.map((k, i) => (
-                <option key={k.name} value={i}>
-                  {k.name} メジャー
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
+        <div className="header-controls">
+          <button
+            className={solfege.on ? 'cat-btn cat-on' : 'cat-btn'}
+            onClick={solfege.toggle}
+            title="度数にドレミ(移動ド: キーのⅠ=ド)を併記します"
+          >
+            ドレミ併記 {solfege.on ? 'ON' : 'OFF'}
+          </button>
+          {tab === 'learn' && (
+            <label className="key-select">
+              キー:
+              <select value={keyIdx} onChange={(e) => setKeyIdx(Number(e.target.value))}>
+                {KEYS.map((k, i) => (
+                  <option key={k.name} value={i}>
+                    {k.name} メジャー
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+        </div>
       </header>
 
       <nav className="tabs">

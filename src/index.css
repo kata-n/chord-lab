@@ -45,6 +45,13 @@ body {
   margin: 0;
 }
 
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .key-select {
   font-size: 0.9rem;
   color: var(--muted);
