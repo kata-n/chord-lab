@@ -164,6 +164,57 @@ export function progressionChords(prog, key, opts = {}) {
   return prog.degrees.map((deg) => degreeChord(key, deg, { seventh }));
 }
 
+// キーを半音単位で移調したキーを返す(転調レッスン用)
+export function transposeKey(key, semitones) {
+  const pc = (key.pc + semitones + 12) % 12;
+  return { pc, name: noteName(pc, key.accidental), accidental: key.accidental };
+}
+
+// ダイアトニック外のコード(借用和音・sus4など)を度数表記つきで作る
+export function chordAt(key, offset, quality, roman) {
+  return { ...buildChord(key.pc + offset, quality, key.accidental), roman };
+}
+
+// アイドル曲・J-POPでセクションごとに頻出するパターン
+export const IDOL_PATTERNS = [
+  {
+    id: 'bmelo-stairs',
+    name: 'Bメロの階段',
+    reading: 'Ⅱm→Ⅲm→Ⅳ→Ⅴ',
+    section: 'Bメロ',
+    desc: 'ⅡmからⅤまで一段ずつのぼって、サビへの期待を溜める定番。のぼり切ったⅤの緊張が、そのままサビ頭の解放感につながる。',
+    build: (key) => [2, 3, 4, 5].map((d) => degreeChord(key, d)),
+  },
+  {
+    id: 'sabi-four',
+    name: 'サビ頭Ⅳ始まり',
+    reading: 'Ⅳ→Ⅴ→Ⅵm→Ⅰ',
+    section: 'サビ',
+    desc: 'サビをトニック以外のⅣで始めると、地に足がつかない浮遊感と高揚感が出る。王道進行(4536)の親戚で、アイドル曲のサビの大定番。',
+    build: (key) => [4, 5, 6, 1].map((d) => degreeChord(key, d)),
+  },
+  {
+    id: 'sus-tame',
+    name: 'サビ前のため(Ⅴsus4)',
+    reading: 'Ⅳ→Ⅴsus4→Ⅴ→Ⅰ',
+    section: 'サビ直前',
+    desc: 'Ⅴをsus4で引き伸ばしてから3度に解決する「ため」。ドラムのフィルインと一緒に鳴る、「サビが来るぞ」の合図のような響き。',
+    build: (key) => [
+      degreeChord(key, 4),
+      chordAt(key, 7, 'sus4', 'Ⅴsus4'),
+      degreeChord(key, 5),
+      degreeChord(key, 1),
+    ],
+  },
+];
+
+// 同主短調からの借用和音(泣きのコード)
+export const BORROWED = [
+  { id: 'iv-m', offset: 5, quality: 'min', roman: 'Ⅳm', nick: '泣きの定番' },
+  { id: 'flat6', offset: 8, quality: 'maj', roman: '♭Ⅵ', nick: 'エモい持ち上げ' },
+  { id: 'flat7', offset: 10, quality: 'maj', roman: '♭Ⅶ', nick: 'ロックな抜け感' },
+];
+
 // マイナーキーの定番進行
 export const MINOR_PROGRESSIONS = [
   {

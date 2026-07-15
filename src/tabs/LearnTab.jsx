@@ -2,9 +2,11 @@ import { useState } from 'react';
 import {
   blackadderChord,
   buildChord,
+  chordAt,
   degreeChord,
   DIATONIC,
   FUNCTIONS,
+  IDOL_PATTERNS,
   MINOR_DIATONIC,
   MINOR_PROGRESSIONS,
   minorDegreeChord,
@@ -13,6 +15,7 @@ import {
   progressionChords,
   relativeMinor,
   romanName,
+  transposeKey,
 } from '../theory.js';
 import ChordDemo from '../components/ChordDemo.jsx';
 import ProgressionPlayer from '../components/ProgressionPlayer.jsx';
@@ -357,6 +360,124 @@ function Lesson8({ musicKey }) {
   );
 }
 
+function Lesson9({ musicKey }) {
+  const acc = musicKey.accidental;
+  return (
+    <div>
+      <p>
+        アイドル曲やJ-POPは「イントロ → Aメロ → Bメロ → サビ」という構成の中で、
+        <strong>セクションごとの「型」</strong>がよく使われます。型を知っていると、曲を聴いたときに
+        「いまBメロの階段だ!」「サビはⅣ始まりだ!」と聴き取れるようになります。
+      </p>
+      <p>
+        サビの二大定番、<strong>王道進行(4536)</strong>と<strong>小室進行(6451)</strong>は
+        Lesson 4で学びました。ここではそれ以外の頻出パターンを聴いていきます。
+      </p>
+      {IDOL_PATTERNS.map((p) => (
+        <div key={p.id} className="prog-block">
+          <h3>
+            {p.name} <span className="prog-reading">{p.reading}</span>
+          </h3>
+          <p className="prog-examples">よく出る場所: {p.section}</p>
+          <p>{p.desc}</p>
+          <ProgressionPlayer chords={p.build(musicKey)} accidental={acc} />
+        </div>
+      ))}
+      <div className="callout">
+        <strong>練習:</strong> 聴くタブの「アイドル進行あて」で、ここのパターンを
+        ランダムなキーで聴き当てる練習ができます。キーが変わっても型は同じ、を体で覚えましょう。
+      </div>
+    </div>
+  );
+}
+
+function Lesson10({ musicKey }) {
+  const acc = musicKey.accidental;
+  const iv = degreeChord(musicKey, 4);
+  const ivm = chordAt(musicKey, 5, 'min', 'Ⅳm');
+  const cry = [degreeChord(musicKey, 4), ivm, degreeChord(musicKey, 1)];
+  const epic = [
+    chordAt(musicKey, 8, 'maj', '♭Ⅵ'),
+    chordAt(musicKey, 10, 'maj', '♭Ⅶ'),
+    degreeChord(musicKey, 1),
+  ];
+  const rock = [
+    degreeChord(musicKey, 1),
+    chordAt(musicKey, 10, 'maj', '♭Ⅶ'),
+    degreeChord(musicKey, 4),
+    degreeChord(musicKey, 1),
+  ];
+  return (
+    <div>
+      <p>
+        明るい曲の中で、一瞬だけ胸がぎゅっとなる箇所——あの正体はたいてい
+        <strong>借用和音</strong>です。同じルートのマイナーキー(同主短調。
+        {musicKey.name}メジャーなら{musicKey.name}マイナー)からコードを一時的に借りてくるので、
+        メジャーの世界にマイナーの陰りが差し込みます。
+      </p>
+      <h3>Ⅳm — 「泣き」の代名詞</h3>
+      <p>
+        いちばん頻出なのが<strong>Ⅳをマイナーにした Ⅳm</strong>(サブドミナントマイナー)。
+        まずⅣと聴き比べて、中の音が半音下がる瞬間の切なさを確認しましょう。
+      </p>
+      <ChordDemo
+        accidental={acc}
+        chords={[
+          { ...iv, sub: 'ふつうのⅣ' },
+          { ...ivm, sub: '泣きのⅣm' },
+        ]}
+      />
+      <p>実戦では Ⅳ → Ⅳm → Ⅰ の形で「明るい → 切ない → 帰ってくる」と流れるのが定番です。</p>
+      <ProgressionPlayer chords={cry} accidental={acc} />
+      <h3>♭Ⅵ → ♭Ⅶ → Ⅰ — エモい持ち上げ</h3>
+      <p>
+        マイナーキーから♭Ⅵと♭Ⅶを借りて、半音ずつ持ち上がるようにⅠへ着地する形。
+        ゲームクリアのファンファーレや、アニソン・アイドル曲のラストの「勝利感」でおなじみです。
+      </p>
+      <ProgressionPlayer chords={epic} accidental={acc} />
+      <h3>Ⅰ → ♭Ⅶ → Ⅳ — ロックな抜け感</h3>
+      <p>♭Ⅶだけ借りると、力の抜けたロックっぽい爽快感になります。クールな曲調のアイドル曲でも頻出。</p>
+      <ProgressionPlayer chords={rock} accidental={acc} />
+      <div className="callout">
+        <strong>聴き取りのコツ:</strong> 「メジャーの曲なのに急に切ない/影がある」と感じたら
+        借用和音を疑いましょう。ディクテーションの「むずかしい」レベルで、Ⅳm・♭Ⅵ・♭Ⅶの
+        聴き取り練習ができます。
+      </div>
+    </div>
+  );
+}
+
+function Lesson11({ musicKey }) {
+  const acc = musicKey.accidental;
+  const oudou = PROGRESSIONS.find((p) => p.id === 'oudou');
+  const upHalf = transposeKey(musicKey, 1);
+  const upWhole = transposeKey(musicKey, 2);
+  const half = [...progressionChords(oudou, musicKey), ...progressionChords(oudou, upHalf)];
+  const whole = [...progressionChords(oudou, musicKey), ...progressionChords(oudou, upWhole)];
+  return (
+    <div>
+      <p>
+        アイドル曲のクライマックス、ラストのサビで急にもう一段盛り上がる——あれが
+        <strong>転調</strong>(ラスサビ転調)です。いちばん多いのは
+        <strong>半音上げ</strong>と<strong>全音上げ</strong>。進行(度数)はそのままで、
+        土台のキーだけが持ち上がります。
+      </p>
+      <p>
+        王道進行(Ⅳ→Ⅴ→Ⅲm→Ⅵm)を2回演奏します。1周目はキー{musicKey.name}
+        、2周目は半音上の{upHalf.name}。5つめのコードで「フワッと浮く」感じに注目してください。
+      </p>
+      <ProgressionPlayer chords={half} accidental={acc} beatSec={0.85} />
+      <p>こちらは全音(半音2つ分)上げ。より突き抜けた明るさになります(2周目はキー{upWhole.name})。</p>
+      <ProgressionPlayer chords={whole} accidental={acc} beatSec={0.85} />
+      <div className="callout">
+        <strong>聴き取りのコツ:</strong> 転調しても<strong>度数の並びは変わりません</strong>。
+        「コード名」ではなく「Ⅳ→Ⅴ→Ⅲm→Ⅵm」という型で聴けていれば、転調後も迷子になりません。
+        これこそ度数(ディグリー)で学ぶ最大のご利益です。
+      </div>
+    </div>
+  );
+}
+
 export const LESSONS = [
   { id: 'basics', no: 1, title: 'コードってなに? — メジャーとマイナー', comp: Lesson1 },
   { id: 'diatonic', no: 2, title: 'ダイアトニックコードと度数(ディグリー)', comp: Lesson2 },
@@ -371,6 +492,9 @@ export const LESSONS = [
     title: '発展編 — 丸サ進行とブラックアダーコード',
     comp: Lesson8,
   },
+  { id: 'idol', no: 9, title: 'アイドル曲の定番パターン — Bメロ・サビ前・サビ頭', comp: Lesson9 },
+  { id: 'cry', no: 10, title: '泣きのコード — 借用和音(Ⅳm・♭Ⅵ・♭Ⅶ)', comp: Lesson10 },
+  { id: 'modulation', no: 11, title: '転調を体感する — ラスサビ半音上げ', comp: Lesson11 },
 ];
 
 export default function LearnTab({ musicKey, lessonsRead, onRead }) {

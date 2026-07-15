@@ -3,11 +3,13 @@
 import {
   KEYS,
   DIATONIC,
+  IDOL_PATTERNS,
   MINOR_DIATONIC,
   FUNCTIONS,
   PROGRESSIONS,
   QUALITIES,
   buildChord,
+  chordAt,
   degreeChord,
   minorDegreeChord,
   progressionChords,
@@ -232,6 +234,91 @@ export function genQualityEar() {
   };
 }
 
+// アイドル曲頻出の進行あて(キーはランダム)
+const IDOL_EAR_POOL = [
+  ...PROGRESSIONS.filter((p) => p.id === 'oudou' || p.id === 'komuro').map((p) => ({
+    id: p.id,
+    name: `${p.name}(${p.reading})`,
+    build: (key) => progressionChords(p, key),
+  })),
+  ...IDOL_PATTERNS.map((p) => ({
+    id: p.id,
+    name: `${p.name}(${p.reading})`,
+    build: p.build,
+  })),
+];
+
+export function genIdolEar() {
+  const key = pick(KEYS.slice(0, 5)); // C/G/D/A/E からランダム
+  const entry = pick(IDOL_EAR_POOL);
+  const chords = entry.build(key);
+  return {
+    category: 'ear-idol',
+    prompt: `再生された進行はどれ?(キーはランダムです)`,
+    sound: { type: 'progression', chords },
+    soundLabel: '🔊 再生する',
+    mustListen: true,
+    options: IDOL_EAR_POOL.map((e) => e.name),
+    answerIndex: IDOL_EAR_POOL.findIndex((e) => e.id === entry.id),
+    explain: `正解は${entry.name}: ${chords.map((c) => c.roman).join(' → ')}。今回のキーは${key.name}で、${chords
+      .map((c) => c.name)
+      .join(' → ')}でした。`,
+  };
+}
+
+// --- 度数ディクテーション ---
+
+export const DICTATION_LEVELS = [
+  {
+    id: 'easy',
+    label: 'やさしい',
+    desc: 'Ⅰ・Ⅳ・Ⅴ・Ⅵm の4つだけ。ポップスの背骨になるコードたち',
+    pool: ['1', '4', '5', '6'],
+  },
+  {
+    id: 'normal',
+    label: 'ふつう',
+    desc: 'ダイアトニックコード7つ全部から出題',
+    pool: ['1', '2', '3', '4', '5', '6', '7'],
+  },
+  {
+    id: 'hard',
+    label: 'むずかしい',
+    desc: '泣きのコード(Ⅳm・♭Ⅵ・♭Ⅶ)も混ざる実戦モード',
+    pool: ['1', '2', '3', '4', '5', '6', '7', '4m', 'b6', 'b7'],
+  },
+];
+
+export function dictationChord(key, token) {
+  switch (token) {
+    case '4m':
+      return chordAt(key, 5, 'min', 'Ⅳm');
+    case 'b6':
+      return chordAt(key, 8, 'maj', '♭Ⅵ');
+    case 'b7':
+      return chordAt(key, 10, 'maj', '♭Ⅶ');
+    default:
+      return degreeChord(key, Number(token));
+  }
+}
+
+// 4コードの進行を生成。最初のコードは必ずⅠ(キーの基準)で、残り3つを聴き取る。
+export function genDictation(levelId) {
+  const level = DICTATION_LEVELS.find((l) => l.id === levelId);
+  const key = pick(KEYS);
+  const tokens = ['1'];
+  for (let i = 1; i < 4; i++) {
+    let t;
+    do {
+      t = pick(level.pool);
+    } while (t === tokens[i - 1]);
+    tokens.push(t);
+  }
+  const chords = tokens.map((t) => dictationChord(key, t));
+  const options = level.pool.map((t) => ({ token: t, label: dictationChord(key, t).roman }));
+  return { key, tokens, chords, options };
+}
+
 export const QUIZ_CATEGORIES = {
   notes: '構成音',
   degree: 'ディグリー',
@@ -241,4 +328,6 @@ export const QUIZ_CATEGORIES = {
   'ear-majmin': '聴き分け: メジャー/マイナー',
   'ear-prog': '聴き分け: 定番進行',
   'ear-quality': '聴き分け: コードの種類',
+  'ear-idol': '聴き分け: アイドル進行',
+  dictation: 'ディクテーション(度数聴き取り)',
 };

@@ -541,6 +541,45 @@ select,
   margin-bottom: 4px;
 }
 
+/* ディクテーション */
+.dict-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.dict-slots {
+  margin: 16px 0 10px;
+}
+
+.chip-fixed {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.chip-correct {
+  background: #ecfdf5;
+  border-color: var(--ok);
+}
+
+.chip-wrong {
+  background: #fef2f2;
+  border-color: var(--ng);
+}
+
+.dict-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.dict-option {
+  padding: 10px 6px;
+  font-weight: 700;
+}
+
 /* 記録 */
 .stat-card {
   background: var(--card);

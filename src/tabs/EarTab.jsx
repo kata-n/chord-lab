@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import QuizRunner from '../components/QuizRunner.jsx';
-import { genMajMinEar, genProgEar, genQualityEar } from '../quizzes.js';
+import DictationQuiz from '../components/DictationQuiz.jsx';
+import { genIdolEar, genMajMinEar, genProgEar, genQualityEar } from '../quizzes.js';
 
 const CATS = [
   {
@@ -20,6 +21,18 @@ const CATS = [
     label: '定番進行あて',
     gen: genProgEar,
     desc: 'レッスン4の進行を耳で当てる(キーはC固定)',
+  },
+  {
+    id: 'idol',
+    label: 'アイドル進行あて',
+    gen: genIdolEar,
+    desc: 'アイドル曲頻出のパターンをランダムなキーで当てる(レッスン9)',
+  },
+  {
+    id: 'dictation',
+    label: 'ディクテーション',
+    comp: DictationQuiz,
+    desc: '進行を1コードずつ度数で聴き取る実戦練習。耳コピへの近道',
   },
 ];
 
@@ -44,7 +57,11 @@ export default function EarTab() {
         ))}
       </div>
       <p className="cat-desc">{cat.desc}</p>
-      <QuizRunner key={cat.id} generate={cat.gen} />
+      {cat.comp ? (
+        <cat.comp key={cat.id} />
+      ) : (
+        <QuizRunner key={cat.id} generate={cat.gen} />
+      )}
     </div>
   );
 }
