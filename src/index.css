@@ -450,6 +450,13 @@ select,
   font-weight: 700;
 }
 
+.cat-divider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--border);
+  margin: 0 4px;
+}
+
 .cat-desc {
   font-size: 0.88rem;
   color: var(--muted);

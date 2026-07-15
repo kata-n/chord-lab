@@ -2,13 +2,33 @@ import { useEffect, useRef, useState } from 'react';
 import { playProgression } from '../audio.js';
 import { recordAnswer } from '../storage.js';
 import { DICTATION_LEVELS, genDictation } from '../quizzes.js';
-import { degreeChord } from '../theory.js';
+import { degreeChord, KEYS } from '../theory.js';
 import { useSolfege, withSolfege } from '../solfege.jsx';
+
+const KEY_MODE_STORAGE = 'chord-lab-dict-keymode';
+
+const KEY_MODES = [
+  { id: 'c', label: 'キーC固定', desc: 'まずは聴き取りやすいCで相対感覚を固める' },
+  { id: 'random', label: 'ランダムキー', desc: '毎問キーが変わる実戦モード' },
+];
+
+function loadKeyMode() {
+  try {
+    return localStorage.getItem(KEY_MODE_STORAGE) === 'random' ? 'random' : 'c';
+  } catch {
+    return 'c';
+  }
+}
+
+function keyFor(mode) {
+  return mode === 'c' ? KEYS[0] : null;
+}
 
 // 度数ディクテーション: 4コード進行(先頭はⅠ固定)を聴いて、残り3つを度数で答える
 export default function DictationQuiz() {
   const [levelId, setLevelId] = useState('easy');
-  const [q, setQ] = useState(() => genDictation('easy'));
+  const [keyMode, setKeyMode] = useState(loadKeyMode);
+  const [q, setQ] = useState(() => genDictation('easy', keyFor(loadKeyMode())));
   const [answers, setAnswers] = useState([]);
   const [revealed, setRevealed] = useState(false);
   const [count, setCount] = useState({ correct: 0, total: 0 });
@@ -28,9 +48,9 @@ export default function DictationQuiz() {
     }
   };
 
-  const newQuestion = (lv = levelId) => {
+  const newQuestion = (lv = levelId, mode = keyMode) => {
     stop();
-    setQ(genDictation(lv));
+    setQ(genDictation(lv, keyFor(mode)));
     setAnswers([]);
     setRevealed(false);
   };
@@ -38,6 +58,16 @@ export default function DictationQuiz() {
   const changeLevel = (lv) => {
     setLevelId(lv);
     newQuestion(lv);
+  };
+
+  const changeKeyMode = (mode) => {
+    setKeyMode(mode);
+    try {
+      localStorage.setItem(KEY_MODE_STORAGE, mode);
+    } catch {
+      /* 保存できなくても動作は継続 */
+    }
+    newQuestion(levelId, mode);
   };
 
   const playCadence = () => {
@@ -91,8 +121,21 @@ export default function DictationQuiz() {
             {l.label}
           </button>
         ))}
+        <span className="cat-divider" />
+        {KEY_MODES.map((m) => (
+          <button
+            key={m.id}
+            className={m.id === keyMode ? 'cat-btn cat-on' : 'cat-btn'}
+            onClick={() => changeKeyMode(m.id)}
+            title={m.desc}
+          >
+            {m.label}
+          </button>
+        ))}
       </div>
-      <p className="cat-desc">{level.desc}</p>
+      <p className="cat-desc">
+        {level.desc}。{KEY_MODES.find((m) => m.id === keyMode).desc}
+      </p>
 
       <div className="quiz">
         <div className="quiz-score">
