@@ -4,6 +4,7 @@ import { recordAnswer } from '../storage.js';
 import { DICTATION_LEVELS, genDictation } from '../quizzes.js';
 import { degreeChord, KEYS } from '../theory.js';
 import { useSolfege, withSolfege } from '../solfege.jsx';
+import ProgressionPlayer from './ProgressionPlayer.jsx';
 
 const KEY_MODE_STORAGE = 'chord-lab-dict-keymode';
 
@@ -213,14 +214,13 @@ export default function DictationQuiz() {
               正解: {withSolfege(q.chords.map((c) => c.roman).join(' → '), solfegeOn)}(キー
               {q.key.name}では {q.chords.map((c) => c.name).join(' → ')})
             </p>
-            <div className="dict-controls">
-              <button className="btn" onClick={playAll}>
-                🔊 答え合わせで聴く
-              </button>
-              <button className="btn btn-primary" onClick={() => newQuestion()}>
-                次の問題 →
-              </button>
-            </div>
+            <p className="quiz-hint">
+              ▶再生で鍵盤の光る場所を追えます。コードを個別にクリックしてもOK。
+            </p>
+            <ProgressionPlayer chords={q.chords} accidental={q.key.accidental} />
+            <button className="btn btn-primary" onClick={() => newQuestion()}>
+              次の問題 →
+            </button>
           </div>
         )}
       </div>

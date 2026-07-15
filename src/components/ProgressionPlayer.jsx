@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { playProgression } from '../audio.js';
+import { playChord, playProgression } from '../audio.js';
 import { useSolfege, withSolfege } from '../solfege.jsx';
 import PianoKeyboard from './PianoKeyboard.jsx';
 
@@ -56,12 +56,21 @@ export default function ProgressionPlayer({
         </button>
         <div className="chip-row">
           {chords.map((c, i) => (
-            <div key={i} className={i === step ? 'chip chip-on' : 'chip'}>
+            <button
+              key={i}
+              className={i === step ? 'chip chip-btn chip-on' : 'chip chip-btn'}
+              title="クリックでこのコードだけ鳴らして鍵盤に表示"
+              onClick={() => {
+                if (stopRef.current) stopRef.current();
+                playChord(c.midi);
+                setStep(i);
+              }}
+            >
               <div className="chip-name">{c.name}</div>
               {showRoman && c.roman && (
                 <div className="chip-roman">{withSolfege(c.roman, solfegeOn)}</div>
               )}
-            </div>
+            </button>
           ))}
         </div>
       </div>
