@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { playProgression } from '../audio.js';
-import { recordAnswer } from '../storage.js';
+import { recordAnswer, recordDictationResult } from '../storage.js';
 import { DICTATION_LEVELS, genDictation } from '../quizzes.js';
 import { degreeChord, KEYS } from '../theory.js';
 import { useSolfege, withSolfege } from '../solfege.jsx';
@@ -97,6 +97,7 @@ export default function DictationQuiz() {
     if (next.length === 3) {
       const results = next.map((a, i) => a === q.tokens[i + 1]);
       results.forEach((ok) => recordAnswer('dictation', ok));
+      next.forEach((a, i) => recordDictationResult(q.tokens[i + 1], a));
       setCount((c) => ({
         correct: c.correct + results.filter(Boolean).length,
         total: c.total + 3,

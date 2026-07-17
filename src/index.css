@@ -641,6 +641,21 @@ select,
   color: var(--muted);
 }
 
+.stat-sub {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 14px 0 6px;
+}
+
+.confusion-list {
+  margin: 4px 0;
+  padding-left: 20px;
+}
+
+.confusion-list li {
+  margin-bottom: 4px;
+}
+
 .reset-confirm {
   display: flex;
   align-items: center;

@@ -2,7 +2,12 @@
 
 const KEY = 'chord-lab-progress-v1';
 
-const EMPTY = { quiz: {}, lessonsRead: {}, streak: { current: 0, best: 0 } };
+const EMPTY = {
+  quiz: {},
+  lessonsRead: {},
+  streak: { current: 0, best: 0 },
+  dictation: { degrees: {}, confusions: {} },
+};
 
 export function loadProgress() {
   try {
@@ -13,6 +18,7 @@ export function loadProgress() {
       quiz: p.quiz || {},
       lessonsRead: p.lessonsRead || {},
       streak: p.streak || { current: 0, best: 0 },
+      dictation: p.dictation || { degrees: {}, confusions: {} },
     };
   } catch {
     return structuredClone(EMPTY);
@@ -33,6 +39,22 @@ export function recordAnswer(category, correct) {
     p.streak.best = Math.max(p.streak.best, p.streak.current);
   } else {
     p.streak.current = 0;
+  }
+  save(p);
+  return p;
+}
+
+// ディクテーションの度数ごとの成績と取り違えペアを記録する
+export function recordDictationResult(correctToken, answeredToken) {
+  const p = loadProgress();
+  const d = p.dictation;
+  if (!d.degrees[correctToken]) d.degrees[correctToken] = { correct: 0, total: 0 };
+  d.degrees[correctToken].total += 1;
+  if (correctToken === answeredToken) {
+    d.degrees[correctToken].correct += 1;
+  } else {
+    const k = `${correctToken}>${answeredToken}`;
+    d.confusions[k] = (d.confusions[k] || 0) + 1;
   }
   save(p);
   return p;
