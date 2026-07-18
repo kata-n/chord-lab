@@ -144,8 +144,9 @@ export default function DictationQuiz() {
           このセッション: {count.correct} / {count.total} コード正解
         </div>
         <p className="quiz-prompt">
-          キーは {q.key.name} メジャー。最初のコードはⅠ({degreeChord(q.key, 1).name}
-          )です。続く3つのコードを度数で聴き取りましょう。
+          キーは {q.key.name} メジャー
+          {solfegeOn ? `(このキーでは ド=${q.key.name})` : ''}。最初のコードはⅠ(
+          {degreeChord(q.key, 1).name})です。続く3つのコードを度数で聴き取りましょう。
         </p>
         <div className="dict-controls">
           <button className="btn" onClick={playCadence}>
@@ -174,7 +175,7 @@ export default function DictationQuiz() {
               cls += ok ? ' chip-correct' : ' chip-wrong';
               mark = ok
                 ? '⭕'
-                : `❌ 正解: ${withSolfege(q.chords[i + 1].roman, solfegeOn)}`;
+                : `❌ 正解: ${withSolfege(q.chords[i + 1].roman, solfegeOn)}=${q.chords[i + 1].name}`;
             }
             return (
               <div key={i} className={cls}>
@@ -212,8 +213,10 @@ export default function DictationQuiz() {
               {allCorrect ? '⭕ 全問正解!' : 'おしい!もう一度聴いてみよう'}
             </div>
             <p>
-              正解: {withSolfege(q.chords.map((c) => c.roman).join(' → '), solfegeOn)}(キー
-              {q.key.name}では {q.chords.map((c) => c.name).join(' → ')})
+              正解:{' '}
+              {q.chords
+                .map((c) => `${withSolfege(c.roman, solfegeOn)}=${c.name}`)
+                .join(' → ')}
             </p>
             <p className="quiz-hint">
               ▶再生で鍵盤の光る場所を追えます。コードを個別にクリックしてもOK。
