@@ -8,28 +8,45 @@ import ProgressionPlayer from './ProgressionPlayer.jsx';
 
 const KEY_MODE_STORAGE = 'chord-lab-dict-keymode';
 
-const KEY_MODES = [
-  { id: 'c', label: 'キーC固定', desc: 'まずは聴き取りやすいCで相対感覚を固める' },
-  { id: 'random', label: 'ランダムキー', desc: '毎問キーが変わる実戦モード' },
+// キーを少しずつ広げていく5段階(五度圏の近い順)。正答8割を目安に次へ。
+const KEY_STAGES = [
+  { id: 'c', label: 'C固定', names: ['C'], desc: 'まずは聴き取りやすいCで相対感覚を固める' },
+  { id: 'cg', label: 'C・G', names: ['C', 'G'], desc: '隣のキーGを混ぜて、毎問「ド」を取り直す練習' },
+  { id: 'cgf', label: 'C・G・F', names: ['C', 'G', 'F'], desc: '反対隣のFも追加。3キーからランダム' },
+  {
+    id: 'five',
+    label: '5キー',
+    names: ['C', 'G', 'F', 'D', 'A'],
+    desc: 'C・G・F・D・A の5キーからランダム',
+  },
+  {
+    id: 'all',
+    label: '全キー',
+    names: KEYS.map((k) => k.name),
+    desc: '8キー全部からランダム。実戦モード',
+  },
 ];
 
-function loadKeyMode() {
+function loadStageId() {
   try {
-    return localStorage.getItem(KEY_MODE_STORAGE) === 'random' ? 'random' : 'c';
+    const v = localStorage.getItem(KEY_MODE_STORAGE);
+    if (v === 'random') return 'all'; // 旧設定の引き継ぎ
+    return KEY_STAGES.some((s) => s.id === v) ? v : 'c';
   } catch {
     return 'c';
   }
 }
 
-function keyFor(mode) {
-  return mode === 'c' ? KEYS[0] : null;
+function stageKeys(stageId) {
+  const stage = KEY_STAGES.find((s) => s.id === stageId);
+  return KEYS.filter((k) => stage.names.includes(k.name));
 }
 
 // 度数ディクテーション: 4コード進行(先頭はⅠ固定)を聴いて、残り3つを度数で答える
 export default function DictationQuiz() {
   const [levelId, setLevelId] = useState('easy');
-  const [keyMode, setKeyMode] = useState(loadKeyMode);
-  const [q, setQ] = useState(() => genDictation('easy', keyFor(loadKeyMode())));
+  const [stageId, setStageId] = useState(loadStageId);
+  const [q, setQ] = useState(() => genDictation('easy', stageKeys(loadStageId())));
   const [answers, setAnswers] = useState([]);
   const [revealed, setRevealed] = useState(false);
   const [count, setCount] = useState({ correct: 0, total: 0 });
@@ -49,9 +66,9 @@ export default function DictationQuiz() {
     }
   };
 
-  const newQuestion = (lv = levelId, mode = keyMode) => {
+  const newQuestion = (lv = levelId, stage = stageId) => {
     stop();
-    setQ(genDictation(lv, keyFor(mode)));
+    setQ(genDictation(lv, stageKeys(stage)));
     setAnswers([]);
     setRevealed(false);
   };
@@ -61,14 +78,14 @@ export default function DictationQuiz() {
     newQuestion(lv);
   };
 
-  const changeKeyMode = (mode) => {
-    setKeyMode(mode);
+  const changeStage = (stage) => {
+    setStageId(stage);
     try {
-      localStorage.setItem(KEY_MODE_STORAGE, mode);
+      localStorage.setItem(KEY_MODE_STORAGE, stage);
     } catch {
       /* 保存できなくても動作は継続 */
     }
-    newQuestion(levelId, mode);
+    newQuestion(levelId, stage);
   };
 
   const playCadence = () => {
@@ -124,19 +141,19 @@ export default function DictationQuiz() {
           </button>
         ))}
         <span className="cat-divider" />
-        {KEY_MODES.map((m) => (
+        {KEY_STAGES.map((s) => (
           <button
-            key={m.id}
-            className={m.id === keyMode ? 'cat-btn cat-on' : 'cat-btn'}
-            onClick={() => changeKeyMode(m.id)}
-            title={m.desc}
+            key={s.id}
+            className={s.id === stageId ? 'cat-btn cat-on' : 'cat-btn'}
+            onClick={() => changeStage(s.id)}
+            title={s.desc}
           >
-            {m.label}
+            {s.label}
           </button>
         ))}
       </div>
       <p className="cat-desc">
-        {level.desc}。{KEY_MODES.find((m) => m.id === keyMode).desc}
+        {level.desc}。{KEY_STAGES.find((s) => s.id === stageId).desc}
       </p>
 
       <div className="quiz">

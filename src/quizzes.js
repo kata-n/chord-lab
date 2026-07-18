@@ -303,10 +303,10 @@ export function dictationChord(key, token) {
 }
 
 // 4コードの進行を生成。最初のコードは必ずⅠ(キーの基準)で、残り3つを聴き取る。
-// keyOverride を渡すとそのキーに固定、省略時はランダム。
-export function genDictation(levelId, keyOverride = null) {
+// keyPool(キーの配列)を渡すとその中からランダム、省略時は全キーからランダム。
+export function genDictation(levelId, keyPool = null) {
   const level = DICTATION_LEVELS.find((l) => l.id === levelId);
-  const key = keyOverride || pick(KEYS);
+  const key = keyPool && keyPool.length > 0 ? pick(keyPool) : pick(KEYS);
   const tokens = ['1'];
   for (let i = 1; i < 4; i++) {
     let t;
